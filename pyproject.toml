@@ -4,9 +4,9 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry]
 name = "killertools"
-version = "0.1.0"
+version = "0.1.1"
 description = "A modern, cross-platform Swiss-army toolkit for developers and makers"
-authors = ["Jose Manuel (VoxHash) <contact@voxhash.dev>"]
+authors = ["Silas Renner (VoxHash) <contact@voxhash.dev>"]
 license = "MIT"
 readme = "README.md"
 homepage = "https://github.com/VoxHash/KillerTools"

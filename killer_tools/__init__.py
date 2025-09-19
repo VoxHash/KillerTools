@@ -1,6 +1,6 @@
 """KillerTools - A modern, cross-platform Swiss-army toolkit for developers and makers."""
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "Silas Renner (VoxHash)"
 __email__ = "contact@voxhash.dev"
 __license__ = "MIT"
