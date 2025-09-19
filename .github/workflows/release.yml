@@ -1,0 +1,180 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Install dependencies
+      run: poetry install --no-interaction
+
+    - name: Build wheels
+      run: poetry build
+
+    - name: Generate icons
+      run: poetry run python scripts/export_icons.py
+
+    - name: Install PyInstaller
+      run: poetry add pyinstaller
+
+    - name: Build CLI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/cli/main.py --name killertools-cli --onefile --distpath dist/binaries
+
+    - name: Build TUI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/tui/main.py --name killertools-tui --onefile --distpath dist/binaries
+
+    - name: Build GUI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/gui/main.py --name killertools-gui --onefile --windowed --distpath dist/binaries
+
+    - name: Create release archive
+      run: |
+        mkdir -p release
+        cp dist/*.whl release/
+        cp -r dist/binaries release/
+        cp assets/icons/*.png assets/icons/*.ico assets/icons/*.icns release/ 2>/dev/null || true
+        cd release
+        zip -r ../killertools-${{ github.ref_name }}-linux.zip .
+        cd ..
+
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./killertools-${{ github.ref_name }}-linux.zip
+        asset_name: killertools-${{ github.ref_name }}-linux.zip
+        asset_content_type: application/zip
+
+  build-windows:
+    name: Build Windows Binaries
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Install dependencies
+      run: poetry install --no-interaction
+
+    - name: Generate icons
+      run: poetry run python scripts/export_icons.py
+
+    - name: Install PyInstaller
+      run: poetry add pyinstaller
+
+    - name: Build CLI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/cli/main.py --name killertools-cli --onefile --distpath dist/binaries
+
+    - name: Build TUI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/tui/main.py --name killertools-tui --onefile --distpath dist/binaries
+
+    - name: Build GUI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/gui/main.py --name killertools-gui --onefile --windowed --distpath dist/binaries
+
+    - name: Create release archive
+      run: |
+        mkdir release
+        copy dist\binaries\* release\
+        copy assets\icons\*.png release\ 2>nul || echo "No PNG files"
+        copy assets\icons\*.ico release\ 2>nul || echo "No ICO files"
+        cd release
+        powershell Compress-Archive -Path * -DestinationPath ..\killertools-${{ github.ref_name }}-windows.zip
+        cd ..
+
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./killertools-${{ github.ref_name }}-windows.zip
+        asset_name: killertools-${{ github.ref_name }}-windows.zip
+        asset_content_type: application/zip
+
+  build-macos:
+    name: Build macOS Binaries
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.11"
+
+    - name: Install Poetry
+      uses: snok/install-poetry@v1
+      with:
+        version: latest
+        virtualenvs-create: true
+        virtualenvs-in-project: true
+
+    - name: Install dependencies
+      run: poetry install --no-interaction
+
+    - name: Generate icons
+      run: poetry run python scripts/export_icons.py
+
+    - name: Install PyInstaller
+      run: poetry add pyinstaller
+
+    - name: Build CLI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/cli/main.py --name killertools-cli --onefile --distpath dist/binaries
+
+    - name: Build TUI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/tui/main.py --name killertools-tui --onefile --distpath dist/binaries
+
+    - name: Build GUI binary
+      run: poetry run pyinstaller --clean --noconfirm apps/gui/main.py --name killertools-gui --onefile --windowed --distpath dist/binaries
+
+    - name: Create release archive
+      run: |
+        mkdir -p release
+        cp dist/binaries/* release/
+        cp assets/icons/*.png assets/icons/*.icns release/ 2>/dev/null || true
+        cd release
+        zip -r ../killertools-${{ github.ref_name }}-macos.zip .
+        cd ..
+
+    - name: Upload Release Assets
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: ./killertools-${{ github.ref_name }}-macos.zip
+        asset_name: killertools-${{ github.ref_name }}-macos.zip
+        asset_content_type: application/zip
