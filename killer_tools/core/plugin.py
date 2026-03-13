@@ -116,6 +116,9 @@ class PluginRegistry:
                                 except Exception as e:
                                     self._console.print(f"[red]Failed to instantiate plugin {attr_name}: {e}[/red]")
                                     
+                    except ImportError as e:
+                        # Silently skip plugins with missing optional dependencies
+                        self._console.print(f"[yellow]Skipping plugin {module_name}: {e}[/yellow]")
                     except Exception as e:
                         self._console.print(f"[red]Failed to import plugin module {module_name}: {e}[/red]")
                         
