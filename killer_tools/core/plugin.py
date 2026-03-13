@@ -9,8 +9,17 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Protocol, Type, runtime_checkable
 
 from rich.console import Console
-from textual.app import App
-from PyQt6.QtWidgets import QWidget
+
+# Optional GUI/TUI imports - handle gracefully if not available
+try:
+    from textual.app import App
+except ImportError:
+    App = None  # type: ignore
+
+try:
+    from PyQt6.QtWidgets import QWidget
+except ImportError:
+    QWidget = None  # type: ignore
 
 
 @runtime_checkable
@@ -31,11 +40,11 @@ class Plugin(Protocol):
         """Run the plugin in CLI mode."""
         ...
 
-    def tui_view(self) -> Optional[App]:
+    def tui_view(self) -> Optional[Any]:
         """Return a Textual app for TUI mode. Optional."""
         return None
 
-    def gui_widget(self) -> Optional[QWidget]:
+    def gui_widget(self) -> Optional[Any]:
         """Return a PyQt6 widget for GUI mode. Optional."""
         return None
 
